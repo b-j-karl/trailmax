@@ -6,34 +6,33 @@
 [build-system]
 build-backend = "hatchling.build"
 
-requires = [
-  "hatch-vcs>=0.5.0,<0.6.0",
-  "hatchling>=1.27.0,<1.28.0",
-]
+requires = [ "hatch-vcs>=0.5.0,<0.6.0", "hatchling>=1.27.0,<1.28.0" ]
 
 [project]
-name = "whitelabel"
-description = "A minimal Python package template with a simple Hello World example."
+name = "trailmax"
+description = "Optimise running routes in New Zealand using OpenStreetMap data."
 readme = "README.md"
 license = "MIT"
 license-files = [ "LICENSE" ]
-maintainers = [
-  { name = "Data + Analytics", email = "Sub-DisciplineData+AnalyticsStaff@tonkintaylor.co.nz" },
-]
-authors = [
-  { name = "Bilbo Baggins", email = "bbaggins@tonkintaylor.co.nz" },
-]
-requires-python = ">=3.10"
+authors = [ { name = "Ben Karl", email = "benjames.karl@gmail.com" } ]
+requires-python = ">=3.11"
 
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
 dynamic = [ "urls", "version" ]
-dependencies = [  ]
+dependencies = [
+  "networkx>=3.0",
+  "numpy>=1.24",
+  "osmnx>=1.9",
+  "pydantic>=2.0",
+  "typer>=0.9",
+]
+
+scripts.trailmax = "trailmax.cli:app"
 
 [dependency-groups]
 dev = [
@@ -42,7 +41,6 @@ dev = [
   "ipykernel>=6.30.0",
   "ipython>=8.37.0",
   "ipywidgets>=8.1.7",
-  "matplotlib>=3.10.3",
   "nbstripout>=0.8.1",
   "perfplot>=0.10.2",
   "pip>=25.1.1",
@@ -60,21 +58,13 @@ test = [
   "pytest-emoji>=0.2.0",
   "pytest-md>=0.2.0",
 ]
-doc = [
-  "mkdocs>=1.6.1",
-]
+doc = [ "mkdocs>=1.6.1" ]
 
 [tool.hatch.version]
 source = "vcs"
 
-[tool.hatch.metadata.hooks.vcs.urls]
-"Source Code" = "https://github.com/tonkintaylor/YOUR_REPOSITORY"
-"Bug Tracker" = "https://github.com/tonkintaylor/YOUR_REPOSITORY/issues"
-"Releases" = "https://github.com/tonkintaylor/YOUR_REPOSITORY/releases"
-"Source Archive" = "https://github.com/tonkintaylor/YOUR_REPOSITORY/archive/{commit_hash}.zip"
-
 [tool.hatch.build.hooks.vcs]
-version-file = "src/whitelabel/_version.py"
+version-file = "src/trailmax/_version.py"
 
 [tool.ruff]
 line-length = 88
@@ -149,6 +139,9 @@ lint.per-file-ignores."doc/source/conf.py" = [
   "BLE001", # We want to catch all errors blindly in Sphinx builds
   "INP001", # Not actually a namespace package, a special Sphinx file
 ]
+lint.per-file-ignores."src/trailmax/cli.py" = [
+  "B008", # Typer requires function calls in argument defaults
+]
 # We aren't as strict about code quality in notebooks and scripts
 lint.per-file-ignores."src/{scripts,notebooks}/**" = [
   "ANN",     # Annotations
@@ -172,12 +165,7 @@ lint.per-file-ignores."tests/**/*.py" = [
   "S101",    # Using assert is fine in tests
 ]
 lint.allowed-confusables = [ "ℹ", "–", "σ" ]
-lint.flake8-tidy-imports.banned-api."pytz".msg = "'zoneinfo' should be preferred to 'pytz' when using Python 3.9 and later, see https://tonkintaylor-sonarqube.azurewebsites.net/coding_rules?open=python%3AS6890&rule_key=python%3AS6890"
 lint.pydocstyle.convention = "google"
-
-[tool.codespell]
-ignore-regex = [ "[A-Za-z0-9+/]{100,}" ]
-ignore-words-list = [ "..." ]
 
 [tool.deptry]
 extend_exclude = [ "src/notebooks", "src/scripts", "src/archive" ]
@@ -196,7 +184,11 @@ addopts = [
   "--strict-markers",
 ]
 console_output_style = "progress"
-filterwarnings = [ "error" ]
+filterwarnings = [
+  "error",
+  "ignore:'oneOf' deprecated:DeprecationWarning:pyparsing",
+  "ignore:'oneOf' deprecated::pyparsing",
+]
 xfail_strict = true
 log_cli_level = "INFO"
 
@@ -231,3 +223,6 @@ output = "test-reports/coverage.xml"
 default-groups = [ "dev", "test", "doc" ]
 required-version = "==0.8.3"              # sync with .pre-commit-config.yaml and release.yml
 link-mode = "symlink"
+# Pin urllib3 >= 2.6.3 to fix CVE decompression-bomb vulnerabilities
+# (transitive via requests/osmnx; patched in 2.6.0 / 2.6.3)
+constraint-dependencies = [ "urllib3>=2.6.3" ]

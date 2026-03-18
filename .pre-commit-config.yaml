@@ -1,5 +1,5 @@
 ci:
-    autofix_prs: false
+  autofix_prs: false
 repos:
   - repo: local
     hooks:
@@ -44,13 +44,20 @@ repos:
         language: python
         always_run: true
         pass_filenames: false
-        stages: [manual, pre-commit, pre-push, post-checkout, post-merge, 
-                post-rewrite]
+        stages:
+          [
+            manual,
+            pre-commit,
+            pre-push,
+            post-checkout,
+            post-merge,
+            post-rewrite,
+          ]
       - id: uv-export
         name: uv-export
         files: ^uv\.lock|requirements.txt$
-        entry: uv export --frozen --offline --quiet --no-default-groups 
-            -o="requirements.txt"
+        entry: uv export --frozen --offline --quiet --no-default-groups
+          -o="requirements.txt"
         additional_dependencies:
           - uv==0.8.3
         language: python
@@ -82,8 +89,8 @@ repos:
       - id: ruff-check
         name: ruff-check
         always_run: true
-        entry: uv run --frozen --offline ruff check --fix  --force-exclude 
-            --ignore "FIX"
+        entry: uv run --frozen --offline ruff check --fix  --force-exclude
+          --ignore "FIX"
         types_or: [python, pyi, jupyter]
         additional_dependencies:
           - uv==0.8.3
@@ -121,12 +128,6 @@ repos:
         language: python
         always_run: true
         pass_filenames: false
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
-    hooks:
-      - id: codespell
-        additional_dependencies:
-          - tomli
   - repo: local
     hooks:
       - id: pyright
