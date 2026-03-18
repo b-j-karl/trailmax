@@ -1,7 +1,6 @@
 """Command-line interface for the TrailMax route optimiser."""
 
 import json
-import sys
 from pathlib import Path
 
 import typer
@@ -113,7 +112,3 @@ def main(  # noqa: PLR0913
     if output is not None:
         output.write_text(output_str, encoding="utf-8")
         typer.echo(f"GeoJSON saved to {output}", err=True)
-
-
-if __name__ == "__main__":
-    sys.exit(app())
