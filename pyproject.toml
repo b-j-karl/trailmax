@@ -192,6 +192,7 @@ console_output_style = "progress"
 filterwarnings = [
   "error",
   "ignore:'oneOf' deprecated:DeprecationWarning:pyparsing",
+  "ignore:'oneOf' deprecated::pyparsing",
 ]
 xfail_strict = true
 log_cli_level = "INFO"
