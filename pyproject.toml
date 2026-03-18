@@ -242,3 +242,6 @@ output = "test-reports/coverage.xml"
 default-groups = [ "dev", "test", "doc" ]
 required-version = "==0.8.3"              # sync with .pre-commit-config.yaml and release.yml
 link-mode = "symlink"
+# Pin urllib3 >= 2.6.3 to fix CVE decompression-bomb vulnerabilities
+# (transitive via requests/osmnx; patched in 2.6.0 / 2.6.3)
+constraint-dependencies = [ "urllib3>=2.6.3" ]
