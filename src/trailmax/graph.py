@@ -47,7 +47,7 @@ def build_graph(
         network_type=network_type,
         simplify=True,
     )
-    return ox.add_edge_lengths(graph)
+    return ox.distance.add_edge_lengths(graph)
 
 
 def get_nearest_node(graph: nx.MultiDiGraph, lat: float, lon: float) -> int:

@@ -28,12 +28,12 @@ class MockElevationProvider(ElevationProvider):
     elevation source is integrated.
     """
 
-    def get_elevation(self, _lat: float, _lon: float) -> float:
+    def get_elevation(self, lat: float, lon: float) -> float:  # noqa: ARG002
         """Return a mock elevation of 0 m for any coordinate.
 
         Args:
-            _lat: Latitude in decimal degrees (unused).
-            _lon: Longitude in decimal degrees (unused).
+            lat: Latitude in decimal degrees (unused).
+            lon: Longitude in decimal degrees (unused).
 
         Returns:
             Always 0.0.
