@@ -12,8 +12,8 @@ requires = [
 ]
 
 [project]
-name = "whitelabel"
-description = "A minimal Python package template with a simple Hello World example."
+name = "trailmax"
+description = "Optimise running routes in New Zealand using OpenStreetMap data."
 readme = "README.md"
 license = "MIT"
 license-files = [ "LICENSE" ]
@@ -23,17 +23,25 @@ maintainers = [
 authors = [
   { name = "Bilbo Baggins", email = "bbaggins@tonkintaylor.co.nz" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
 ]
 dynamic = [ "urls", "version" ]
-dependencies = [  ]
+dependencies = [
+  "networkx>=3.0",
+  "numpy>=1.24",
+  "osmnx>=1.9",
+  "pydantic>=2.0",
+  "typer>=0.9",
+]
+
+[project.scripts]
+trailmax = "trailmax.cli:app"
 
 [dependency-groups]
 dev = [
@@ -74,7 +82,7 @@ source = "vcs"
 "Source Archive" = "https://github.com/tonkintaylor/YOUR_REPOSITORY/archive/{commit_hash}.zip"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "src/whitelabel/_version.py"
+version-file = "src/trailmax/_version.py"
 
 [tool.ruff]
 line-length = 88
@@ -148,6 +156,9 @@ lint.per-file-ignores."**/__init__.py" = [
 lint.per-file-ignores."doc/source/conf.py" = [
   "BLE001", # We want to catch all errors blindly in Sphinx builds
   "INP001", # Not actually a namespace package, a special Sphinx file
+]
+lint.per-file-ignores."src/trailmax/cli.py" = [
+  "B008", # Typer requires function calls in argument defaults
 ]
 # We aren't as strict about code quality in notebooks and scripts
 lint.per-file-ignores."src/{scripts,notebooks}/**" = [
