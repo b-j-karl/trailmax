@@ -91,13 +91,13 @@ def main(  # noqa: PLR0913
 
     try:
         elevation_provider = LinzElevationProvider()
-    except ValueError:
+    except ValueError as e:
         msg = (
             "LINZ_API_KEY environment variable is required for elevation data. "
             "Set LINZ_API_KEY and try again."
         )
         typer.echo(msg, err=True)
-        raise typer.Exit(code=1)
+        raise typer.Exit(code=1) from e
     else:
         result = optimize_route(
             request,
