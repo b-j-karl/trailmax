@@ -67,7 +67,8 @@ Output is a GeoJSON `Feature` printed to stdout:
 ### Python API
 
 ```python
-from trailmax import RouteRequest, RouteConstraints, optimize_route
+from trailmax import LinzElevationProvider, RouteRequest, RouteConstraints, optimize_route
+from trailmax.graph import build_graph
 
 request = RouteRequest(
     start_lat=-36.8485,
@@ -76,8 +77,10 @@ request = RouteRequest(
     target_elevation_m=200.0,
     constraints=RouteConstraints(route_type="loop"),
 )
+provider = LinzElevationProvider()
+graph = build_graph(request.start_lat, request.start_lon)
 
-result = optimize_route(request, seed=42)
+result = optimize_route(request, provider, graph, seed=42)
 print(f"Distance: {result.distance_km:.1f} km")
 print(f"Elevation gain: {result.elevation_gain_m:.0f} m")
 print(f"Objective error: {result.objective_error:.3f}")
@@ -88,16 +91,20 @@ print(f"Objective error: {result.objective_error:.3f}")
 ```python
 from trailmax.elevation import ElevationProvider
 from trailmax import optimize_route, RouteRequest
+from trailmax.graph import build_graph
 
 class MyNZElevationProvider(ElevationProvider):
     def get_elevation(self, lat: float, lon: float) -> float:
         # Call your DEM / LINZ API here
         return 0.0
 
+request = RouteRequest(
+    start_lat=-36.8485, start_lon=174.7633, target_distance_km=10.0
+)
 result = optimize_route(
-    RouteRequest(start_lat=-36.8485, start_lon=174.7633,
-                 target_distance_km=10.0),
+    request,
     elevation_provider=MyNZElevationProvider(),
+    graph=build_graph(request.start_lat, request.start_lon),
     seed=42,
 )
 ```

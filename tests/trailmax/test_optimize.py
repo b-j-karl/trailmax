@@ -5,6 +5,7 @@ import random
 import networkx as nx
 import pytest
 
+from trailmax.elevation import ElevationProvider
 from trailmax.models import RouteConstraints, RouteRequest
 from trailmax.optimize import (
     RouteOptimizer,
@@ -12,6 +13,13 @@ from trailmax.optimize import (
     _generate_out_and_back_route,
     optimize_route,
 )
+
+
+class StubElevationProvider(ElevationProvider):
+    """Returns a fixed elevation for every query."""
+
+    def get_elevation(self, lat: float, lon: float) -> float:  # noqa: ARG002
+        return 0.0
 
 
 def make_test_graph() -> nx.MultiDiGraph:
@@ -51,6 +59,12 @@ def test_graph() -> nx.MultiDiGraph:
     return make_test_graph()
 
 
+@pytest.fixture
+def stub_provider() -> StubElevationProvider:
+    """Fixture providing a stub elevation provider."""
+    return StubElevationProvider()
+
+
 def test_generate_loop_route_starts_and_ends_at_same_node(test_graph):
     rng = random.Random(42)
     path, _ = _generate_loop_route(test_graph, 0, 1.0, 0.0, rng)
@@ -63,36 +77,36 @@ def test_generate_out_and_back_route_is_palindrome(test_graph):
     assert path == list(reversed(path))
 
 
-def test_loop_route_type_in_result(test_graph):
+def test_loop_route_type_in_result(test_graph, stub_provider):
     request = RouteRequest(
         start_lat=-36.848,
         start_lon=174.763,
         target_distance_km=1.0,
         constraints=RouteConstraints(route_type="loop"),
     )
-    result = optimize_route(request, graph=test_graph, seed=42, start_node=0)
+    result = optimize_route(request, stub_provider, test_graph, seed=42, start_node=0)
     assert result.route_type == "loop"
 
 
-def test_out_and_back_route_type_in_result(test_graph):
+def test_out_and_back_route_type_in_result(test_graph, stub_provider):
     request = RouteRequest(
         start_lat=-36.848,
         start_lon=174.763,
         target_distance_km=1.0,
         constraints=RouteConstraints(route_type="out_and_back"),
     )
-    result = optimize_route(request, graph=test_graph, seed=42, start_node=0)
+    result = optimize_route(request, stub_provider, test_graph, seed=42, start_node=0)
     assert result.route_type == "out_and_back"
 
 
-def test_deterministic_mode_same_seed(test_graph):
+def test_deterministic_mode_same_seed(test_graph, stub_provider):
     request = RouteRequest(
         start_lat=-36.848,
         start_lon=174.763,
         target_distance_km=1.0,
     )
-    result_a = optimize_route(request, graph=test_graph, seed=7, start_node=0)
-    result_b = optimize_route(request, graph=test_graph, seed=7, start_node=0)
+    result_a = optimize_route(request, stub_provider, test_graph, seed=7, start_node=0)
+    result_b = optimize_route(request, stub_provider, test_graph, seed=7, start_node=0)
     assert result_a.geometry == result_b.geometry
 
 
@@ -102,18 +116,19 @@ def test_different_seeds_may_differ():
         start_lon=174.763,
         target_distance_km=1.0,
     )
-    optimizer = RouteOptimizer(seed=999, num_candidates=20)
+    provider = StubElevationProvider()
+    optimizer = RouteOptimizer(provider, seed=999, num_candidates=20)
     result = optimizer.optimise(request, graph=make_test_graph(), start_node=0)
     assert result.distance_km >= 0.0
 
 
-def test_result_diagnostics_keys(test_graph):
+def test_result_diagnostics_keys(test_graph, stub_provider):
     request = RouteRequest(
         start_lat=-36.848,
         start_lon=174.763,
         target_distance_km=1.0,
     )
-    result = optimize_route(request, graph=test_graph, seed=0, start_node=0)
+    result = optimize_route(request, stub_provider, test_graph, seed=0, start_node=0)
     assert "num_nodes" in result.diagnostics
     assert "target_distance_km" in result.diagnostics
     assert "target_elevation_m" in result.diagnostics
