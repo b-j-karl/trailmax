@@ -236,7 +236,7 @@ class RouteOptimizer:
 def optimize_route(
     request: RouteRequest,
     elevation_provider: ElevationProvider,
-    graph: nx.MultiDiGraph,
+    graph: nx.MultiDiGraph | None = None,
     seed: int | None = None,
     start_node: int | None = None,
 ) -> RouteResult:
@@ -244,8 +244,9 @@ def optimize_route(
 
     Args:
         request: Route request containing start location and targets.
-        graph: Pre-built OSMnx graph. Downloads from OSM if ``None``.
         elevation_provider: Elevation provider.
+        graph: Pre-built OSMnx graph. If ``None``, a graph is downloaded and
+            built from OSM data.
         seed: Integer random seed for reproducible results.
         start_node: Graph node to use as route start. Computed from
             ``request.start_lat``/``start_lon`` if not given.
