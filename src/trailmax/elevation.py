@@ -106,7 +106,10 @@ def _parse_raster_elevation(data: dict, layer_id: int) -> float:
     layer_key = str(layer_id)
     layers = data.get("rasterQuery", {}).get("layers", {})
     layer = layers.get(layer_key, {})
-    bands = layer.get("bands", {})
+    bands = layer.get("bands", [])
+    if not bands:
+        logger.warning("No elevation data for query; returning 0.0")
+        return 0.0
     band_1, *_ = bands
     value = band_1.get("value")
     if value is None:

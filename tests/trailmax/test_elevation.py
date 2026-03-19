@@ -34,9 +34,7 @@ class TestParseRasterElevation:
             "rasterQuery": {
                 "layers": {
                     "121859": {
-                        "bands": {
-                            "1": {"value": 42.5},
-                        },
+                        "bands": [{"value": 42.5}],
                     },
                 },
             },
@@ -54,9 +52,7 @@ class TestParseRasterElevation:
             "rasterQuery": {
                 "layers": {
                     "121859": {
-                        "bands": {
-                            "1": {"value": None},
-                        },
+                        "bands": [{"value": None}],
                     },
                 },
             },
