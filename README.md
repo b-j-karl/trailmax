@@ -111,7 +111,7 @@ src/trailmax/
 ├── __init__.py       # Public API re-exports
 ├── models.py         # RouteRequest, RouteResult, RouteConstraints
 ├── graph.py          # OSMnx graph download, NZ bounds check, edge weights
-├── elevation.py      # ElevationProvider ABC + MockElevationProvider
+├── elevation.py      # ElevationProvider ABC + LinzElevationProvider
 ├── optimize.py       # Heuristic optimiser (loop & out-and-back)
 ├── metrics.py        # Haversine distance, elevation gain, objective error
 └── cli.py            # Typer CLI entrypoint
@@ -124,9 +124,8 @@ tests/trailmax/
 
 ## Limitations & next steps
 
-- **Elevation data** – the default `MockElevationProvider` returns 0 m for
-  every point. Integrate a real NZ DEM (e.g. LINZ 8 m DEM) by implementing
-  `ElevationProvider.get_elevation`.
+- **Elevation data** – `LinzElevationProvider` queries the LINZ 1 m DEM.
+  Ensure a valid ``LINZ_API_KEY`` is set in your environment.
 - **Graph caching** – OSM data is re-downloaded on each call. Add a local
   cache with `osmnx.settings.use_cache = True`.
 - **Optimisation quality** – the current heuristic samples random waypoints.

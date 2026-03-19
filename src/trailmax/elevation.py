@@ -30,26 +30,6 @@ class ElevationProvider(ABC):
         """
 
 
-class MockElevationProvider(ElevationProvider):
-    """Stub elevation provider that always returns zero metres.
-
-    Useful for testing and as a placeholder until a real NZ
-    elevation source is integrated.
-    """
-
-    def get_elevation(self, lat: float, lon: float) -> float:  # noqa: ARG002
-        """Return a mock elevation of 0 m for any coordinate.
-
-        Args:
-            lat: Latitude in decimal degrees (unused).
-            lon: Longitude in decimal degrees (unused).
-
-        Returns:
-            Always 0.0.
-        """
-        return 0.0
-
-
 class LinzElevationProvider(ElevationProvider):
     """Elevation provider using the LINZ NZ LiDAR 1 m DEM raster query API.
 

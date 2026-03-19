@@ -4,16 +4,8 @@ import pytest
 
 from trailmax.elevation import (
     LinzElevationProvider,
-    MockElevationProvider,
     _parse_raster_elevation,
 )
-
-
-class TestMockElevationProvider:
-    def test_returns_zero(self):
-        provider = MockElevationProvider()
-
-        assert provider.get_elevation(-41.27, 173.28) == 0.0
 
 
 class TestLinzElevationProviderInit:
