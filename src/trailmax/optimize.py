@@ -6,7 +6,6 @@ import networkx as nx
 
 from trailmax.elevation import (
     ElevationProvider,
-    MockElevationProvider,
     add_elevation_to_graph,
 )
 from trailmax.graph import build_graph, compute_edge_weights, get_nearest_node
@@ -145,19 +144,18 @@ class RouteOptimizer:
     """Optimises running routes using OSMnx graph data and elevation.
 
     Args:
-        elevation_provider: Provider for elevation lookups. Defaults to
-            :class:`~trailmax.elevation.MockElevationProvider`.
+        elevation_provider: Provider for elevation lookups.
         seed: Integer random seed for reproducible results.
         num_candidates: Number of candidate routes to evaluate per run.
     """
 
     def __init__(
         self,
-        elevation_provider: ElevationProvider | None = None,
+        elevation_provider: ElevationProvider,
         seed: int | None = None,
         num_candidates: int = _NUM_CANDIDATES,
     ) -> None:
-        self._elevation_provider = elevation_provider or MockElevationProvider()
+        self._elevation_provider = elevation_provider
         self._seed = seed
         self._num_candidates = num_candidates
 
@@ -237,8 +235,8 @@ class RouteOptimizer:
 
 def optimize_route(
     request: RouteRequest,
+    elevation_provider: ElevationProvider,
     graph: nx.MultiDiGraph | None = None,
-    elevation_provider: ElevationProvider | None = None,
     seed: int | None = None,
     start_node: int | None = None,
 ) -> RouteResult:
@@ -246,9 +244,9 @@ def optimize_route(
 
     Args:
         request: Route request containing start location and targets.
-        graph: Pre-built OSMnx graph. Downloads from OSM if ``None``.
-        elevation_provider: Elevation provider. Defaults to
-            :class:`~trailmax.elevation.MockElevationProvider`.
+        elevation_provider: Elevation provider.
+        graph: Pre-built OSMnx graph. If ``None``, a graph is downloaded and
+            built from OSM data.
         seed: Integer random seed for reproducible results.
         start_node: Graph node to use as route start. Computed from
             ``request.start_lat``/``start_lon`` if not given.

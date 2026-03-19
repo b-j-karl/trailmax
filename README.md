@@ -67,7 +67,8 @@ Output is a GeoJSON `Feature` printed to stdout:
 ### Python API
 
 ```python
-from trailmax import RouteRequest, RouteConstraints, optimize_route
+from trailmax import LinzElevationProvider, RouteRequest, RouteConstraints, optimize_route
+from trailmax.graph import build_graph
 
 request = RouteRequest(
     start_lat=-36.8485,
@@ -76,8 +77,10 @@ request = RouteRequest(
     target_elevation_m=200.0,
     constraints=RouteConstraints(route_type="loop"),
 )
+provider = LinzElevationProvider()
+graph = build_graph(request.start_lat, request.start_lon)
 
-result = optimize_route(request, seed=42)
+result = optimize_route(request, provider, graph, seed=42)
 print(f"Distance: {result.distance_km:.1f} km")
 print(f"Elevation gain: {result.elevation_gain_m:.0f} m")
 print(f"Objective error: {result.objective_error:.3f}")
@@ -88,16 +91,20 @@ print(f"Objective error: {result.objective_error:.3f}")
 ```python
 from trailmax.elevation import ElevationProvider
 from trailmax import optimize_route, RouteRequest
+from trailmax.graph import build_graph
 
 class MyNZElevationProvider(ElevationProvider):
     def get_elevation(self, lat: float, lon: float) -> float:
         # Call your DEM / LINZ API here
         return 0.0
 
+request = RouteRequest(
+    start_lat=-36.8485, start_lon=174.7633, target_distance_km=10.0
+)
 result = optimize_route(
-    RouteRequest(start_lat=-36.8485, start_lon=174.7633,
-                 target_distance_km=10.0),
+    request,
     elevation_provider=MyNZElevationProvider(),
+    graph=build_graph(request.start_lat, request.start_lon),
     seed=42,
 )
 ```
@@ -111,7 +118,7 @@ src/trailmax/
 ├── __init__.py       # Public API re-exports
 ├── models.py         # RouteRequest, RouteResult, RouteConstraints
 ├── graph.py          # OSMnx graph download, NZ bounds check, edge weights
-├── elevation.py      # ElevationProvider ABC + MockElevationProvider
+├── elevation.py      # ElevationProvider ABC + LinzElevationProvider
 ├── optimize.py       # Heuristic optimiser (loop & out-and-back)
 ├── metrics.py        # Haversine distance, elevation gain, objective error
 └── cli.py            # Typer CLI entrypoint
@@ -124,9 +131,8 @@ tests/trailmax/
 
 ## Limitations & next steps
 
-- **Elevation data** – the default `MockElevationProvider` returns 0 m for
-  every point. Integrate a real NZ DEM (e.g. LINZ 8 m DEM) by implementing
-  `ElevationProvider.get_elevation`.
+- **Elevation data** – `LinzElevationProvider` queries the LINZ 1 m DEM.
+  Ensure a valid ``LINZ_API_KEY`` is set in your environment.
 - **Graph caching** – OSM data is re-downloaded on each call. Add a local
   cache with `osmnx.settings.use_cache = True`.
 - **Optimisation quality** – the current heuristic samples random waypoints.

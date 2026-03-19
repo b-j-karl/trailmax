@@ -5,7 +5,8 @@ from pathlib import Path
 
 import typer
 
-from trailmax.graph import is_in_new_zealand
+from trailmax.elevation import LinzElevationProvider
+from trailmax.graph import build_graph, is_in_new_zealand
 from trailmax.models import RouteConstraints, RouteRequest, RouteType
 from trailmax.optimize import optimize_route
 
@@ -88,7 +89,22 @@ def main(  # noqa: PLR0913
         graph_radius_m=radius_m,
     )
 
-    result = optimize_route(request, seed=seed)
+    try:
+        elevation_provider = LinzElevationProvider()
+    except ValueError as e:
+        msg = (
+            "LINZ_API_KEY environment variable is required for elevation data. "
+            "Set LINZ_API_KEY and try again."
+        )
+        typer.echo(msg, err=True)
+        raise typer.Exit(code=1) from e
+    else:
+        result = optimize_route(
+            request,
+            elevation_provider=elevation_provider,
+            graph=build_graph(start_lat, start_lon, radius_m=radius_m),
+            seed=seed,
+        )
 
     geojson: dict[str, object] = {
         "type": "Feature",
